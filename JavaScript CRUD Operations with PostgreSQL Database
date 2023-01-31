@@ -1,0 +1,66 @@
+const { Client } = require('pg');
+
+const client = new Client({
+  host: 'localhost',
+  port: 5432,
+  user: 'postgres',
+  password: 'password',
+  database: 'mydb'
+});
+
+const createUsersTable = `
+CREATE TABLE IF NOT EXISTS users (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  age INT NOT NULL,
+  email VARCHAR(255) NOT NULL UNIQUE
+);
+`;
+
+const addUser = (name, age, email) => {
+  const query = 'INSERT INTO users (name, age, email) VALUES ($1, $2, $3)';
+  const values = [name, age, email];
+  return client.query(query, values);
+};
+
+const getUsers = () => {
+  const query = 'SELECT * FROM users';
+  return client.query(query);
+};
+
+const updateUser = (id, name, age, email) => {
+  const query = 'UPDATE users SET name = $2, age = $3, email = $4 WHERE id = $1';
+  const values = [id, name, age, email];
+  return client.query(query, values);
+};
+
+const deleteUser = id => {
+  const query = 'DELETE FROM users WHERE id = $1';
+  const values = [id];
+  return client.query(query, values);
+};
+
+client.connect()
+  .then(() => console.log('Connected to database successfully!'))
+  .then(() => client.query(createUsersTable))
+  .then(() => addUser('John Doe', 30, 'johndoe@example.com'))
+  .then(res => {
+    console.log(`User with ID ${res.rows[0].id} added.`);
+    return getUsers();
+  })
+  .then(res => {
+    console.log('Users:', res.rows);
+    return updateUser(1, 'Jane Doe', 35, 'janedoe@example.com');
+  })
+  .then(() => {
+    console.log('User updated.');
+    return deleteUser(1);
+  })
+  .then(() => {
+    console.log('User deleted.');
+    client.end();
+  })
+  .catch(err => {
+    console.error('Error connecting to database:', err);
+    client.end();
+  });
