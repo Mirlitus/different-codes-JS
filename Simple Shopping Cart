@@ -1,0 +1,37 @@
+class Product {
+  constructor(name, price) {
+    this.name = name;
+    this.price = price;
+  }
+}
+
+class ShoppingCart {
+  constructor() {
+    this.products = [];
+  }
+
+  addProduct(product) {
+    this.products.push(product);
+  }
+
+  removeProduct(product) {
+    this.products = this.products.filter(p => p.name !== product.name);
+  }
+
+  getTotal() {
+    return this.products.reduce((acc, product) => acc + product.price, 0);
+  }
+}
+
+const shoes = new Product('shoes', 50);
+const shirt = new Product('shirt', 30);
+const pants = new Product('pants', 40);
+
+const cart = new ShoppingCart();
+cart.addProduct(shoes);
+cart.addProduct(shirt);
+cart.addProduct(pants);
+
+console.log(cart.getTotal()); // 120
+cart.removeProduct(shirt);
+console.log(cart.getTotal()); // 90
